@@ -14,7 +14,7 @@ var DB *sql.DB
 func ConnectDB() {
     var err error
 
-    dsn := os.Getenv("DB_DSN") // ambil dari env
+    dsn := os.Getenv("DB_DSN") 
     if dsn == "" {
         log.Fatal("DB_DSN tidak ditemukan di environment variable")
     }

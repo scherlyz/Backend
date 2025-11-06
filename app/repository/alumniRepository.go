@@ -3,15 +3,17 @@ package repository
 import (
 	"backendgo/app/model"
 	"backendgo/database"
-	"fmt"
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Get All Alumni
+// ===================================================
+// 🔹 Get All Alumni
+// ===================================================
 func GetAllAlumni() ([]model.Alumni, error) {
 	rows, err := database.DB.Query(`
 		SELECT id, user_id, nim, nama, jurusan, angkatan, tahun_lulus, email, 
@@ -39,7 +41,9 @@ func GetAllAlumni() ([]model.Alumni, error) {
 	return alumniList, nil
 }
 
-// Get Alumni by ID
+// ===================================================
+// 🔹 Get Alumni by ID
+// ===================================================
 func GetAlumniByID(id int) (model.Alumni, error) {
 	var a model.Alumni
 	err := database.DB.QueryRow(`
@@ -55,12 +59,14 @@ func GetAlumniByID(id int) (model.Alumni, error) {
 	return a, err
 }
 
-// Create Alumni
-func CreateAlumni(a model.Alumni) (model.Alumni, error) {
+// ===================================================
+// 🔹 Create Alumni
+// ===================================================
+func CreateAlumni(a model.CreateAlumniRequest) (model.Alumni, error) {
 	ctx := context.Background()
 	tx, err := database.DB.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
-		return a, err
+		return model.Alumni{}, err
 	}
 	defer func() {
 		if err != nil {
@@ -68,10 +74,10 @@ func CreateAlumni(a model.Alumni) (model.Alumni, error) {
 		}
 	}()
 
-	// 1️⃣ Insert ke tabel users dulu
+	// 1️⃣ Buat user otomatis
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
 	if err != nil {
-		return a, err
+		return model.Alumni{}, err
 	}
 
 	var userID int
@@ -81,61 +87,75 @@ func CreateAlumni(a model.Alumni) (model.Alumni, error) {
 		RETURNING id
 	`, a.Nama, a.Email, string(passwordHash), "user").Scan(&userID)
 	if err != nil {
-		return a, err
+		return model.Alumni{}, err
 	}
-	a.UserID = userID
 
 	// 2️⃣ Insert ke tabel alumni
+	var newAlumni model.Alumni
 	err = tx.QueryRowContext(ctx, `
 		INSERT INTO alumni (
 			user_id, nim, nama, jurusan, angkatan, tahun_lulus, email,
 			no_telepon, alamat, status_kematian, created_at, updated_at
 		) VALUES (
 			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW(),NOW()
-		) RETURNING id
+		) RETURNING id, user_id, nim, nama, jurusan, angkatan, tahun_lulus,
+		          email, no_telepon, alamat, status_kematian, created_at, updated_at
 	`,
-		a.UserID, a.NIM, a.Nama, a.Jurusan, a.Angkatan,
+		userID, a.NIM, a.Nama, a.Jurusan, a.Angkatan,
 		a.TahunLulus, a.Email, a.NoTelepon, a.Alamat, a.StatusKematian,
-	).Scan(&a.ID)
+	).Scan(
+		&newAlumni.ID, &newAlumni.UserID, &newAlumni.NIM, &newAlumni.Nama,
+		&newAlumni.Jurusan, &newAlumni.Angkatan, &newAlumni.TahunLulus,
+		&newAlumni.Email, &newAlumni.NoTelepon, &newAlumni.Alamat,
+		&newAlumni.StatusKematian, &newAlumni.CreatedAt, &newAlumni.UpdatedAt,
+	)
 	if err != nil {
-		return a, err
+		return model.Alumni{}, err
 	}
 
-	// 3️⃣ Commit transaksi
 	err = tx.Commit()
 	if err != nil {
-		return a, err
+		return model.Alumni{}, err
 	}
 
-	return a, nil
+	return newAlumni, nil
 }
 
-// Update Alumni
-func UpdateAlumni(a model.Alumni) (model.Alumni, error) {
-	if a.UpdatedAt.IsZero() {
-		a.UpdatedAt = time.Now()
-	}
+// ===================================================
+// 🔹 Update Alumni
+// ===================================================
+func UpdateAlumni(a model.UpdateAlumniRequest) (model.Alumni, error) {
+	now := time.Now()
 
 	_, err := database.DB.Exec(`
 		UPDATE alumni 
-		SET user_id=$1, nim=$2, nama=$3, jurusan=$4, angkatan=$5, tahun_lulus=$6,
-		    email=$7, no_telepon=$8, alamat=$9, status_kematian=$10, updated_at=$11
-		WHERE id=$12
+		SET nim=$1, nama=$2, jurusan=$3, angkatan=$4, tahun_lulus=$5,
+		    email=$6, no_telepon=$7, alamat=$8, status_kematian=$9, updated_at=$10
+		WHERE id=$11
 	`,
-		a.UserID, a.NIM, a.Nama, a.Jurusan, a.Angkatan,
-		a.TahunLulus, a.Email, a.NoTelepon, a.Alamat,
-		a.StatusKematian, a.UpdatedAt, a.ID,
+		a.NIM, a.Nama, a.Jurusan, a.Angkatan, a.TahunLulus,
+		a.Email, a.NoTelepon, a.Alamat, a.StatusKematian, now, a.ID,
 	)
-	return a, err
+	if err != nil {
+		return model.Alumni{}, err
+	}
+
+	// ambil lagi data terbaru
+	updated, err := GetAlumniByID(a.ID)
+	return updated, err
 }
 
-// Delete Alumni
+// ===================================================
+// 🔹 Delete Alumni
+// ===================================================
 func DeleteAlumni(id int) error {
 	_, err := database.DB.Exec("DELETE FROM alumni WHERE id=$1", id)
 	return err
 }
 
-// Update Status Kematian
+// ===================================================
+// 🔹 Update Status Kematian
+// ===================================================
 func UpdateStatusKematian(id int, status bool) error {
 	_, err := database.DB.Exec(`
         UPDATE alumni 
@@ -145,7 +165,9 @@ func UpdateStatusKematian(id int, status bool) error {
 	return err
 }
 
-// Pagination with Search
+// ===================================================
+// 🔹 Pagination with Search
+// ===================================================
 func GetAlumniRepo(search, sortBy, order string, limit, offset int) ([]model.Alumni, error) {
 	query := fmt.Sprintf(`
         SELECT id, user_id, nim, nama, jurusan, angkatan, tahun_lulus, email, 
@@ -177,7 +199,9 @@ func GetAlumniRepo(search, sortBy, order string, limit, offset int) ([]model.Alu
 	return list, nil
 }
 
-// Count total alumni (for pagination)
+// ===================================================
+// 🔹 Count total alumni (for pagination)
+// ===================================================
 func CountAlumniRepo(search string) (int, error) {
 	var total int
 	err := database.DB.QueryRow(`

@@ -8,4 +8,8 @@ func SetupRoutes(app *fiber.App) {
 	AuthRoute(api)       // login
 	AlumniRoute(api)     // alumni CRUD + role
 	PekerjaanRoute(api)  // pekerjaan CRUD + role
+	PekerjaanMongoRoute(api)
+	SetupFileRoutes(api)
+
+
 }

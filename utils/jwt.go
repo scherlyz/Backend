@@ -27,7 +27,7 @@ func GenerateToken(user model.User) (string, error) {
 // ValidateToken memverifikasi token JWT dan mengembalikan claims
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
     token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-        // Pastikan pakai metode HS256
+        
         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
             return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
         }

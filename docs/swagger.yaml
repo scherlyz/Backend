@@ -1,0 +1,1510 @@
+basePath: /
+definitions:
+  model.Alumni:
+    properties:
+      alamat:
+        type: string
+      angkatan:
+        type: integer
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      jurusan:
+        type: string
+      nama:
+        type: string
+      nim:
+        type: string
+      no_telepon:
+        type: string
+      status_kematian:
+        type: boolean
+      tahun_lulus:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  model.AlumniResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Alumni'
+        type: array
+      meta:
+        $ref: '#/definitions/model.MetaInfo'
+    type: object
+  model.CreateAlumniRequest:
+    properties:
+      alamat:
+        example: Jl. Merdeka No. 1
+        type: string
+      angkatan:
+        example: 2019
+        type: integer
+      email:
+        example: john@example.com
+        type: string
+      jurusan:
+        example: Teknik Informatika
+        type: string
+      nama:
+        example: John Doe
+        type: string
+      nim:
+        example: "12345678"
+        type: string
+      no_telepon:
+        example: "08123456789"
+        type: string
+      status_kematian:
+        example: false
+        type: boolean
+      tahun_lulus:
+        example: 2023
+        type: integer
+    type: object
+  model.CreatePekerjaanRequest:
+    properties:
+      alumni_id:
+        type: integer
+      bidang_industri:
+        type: string
+      deskripsi_pekerjaan:
+        type: string
+      gaji_range:
+        type: string
+      lokasi_kerja:
+        type: string
+      nama_perusahaan:
+        type: string
+      posisi_jabatan:
+        type: string
+      status_pekerjaan:
+        type: string
+      tanggal_mulai_kerja:
+        description: string → biar gampang diparse
+        type: string
+      tanggal_selesai_kerja:
+        description: nullable
+        type: string
+    type: object
+  model.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.MetaInfo:
+    properties:
+      limit:
+        type: integer
+      order:
+        type: string
+      page:
+        type: integer
+      pages:
+        type: integer
+      search:
+        type: string
+      sortBy:
+        type: string
+      total:
+        type: integer
+    type: object
+  model.UpdateAlumniRequest:
+    properties:
+      alamat:
+        example: Jl. Merdeka No. 1
+        type: string
+      angkatan:
+        example: 2019
+        type: integer
+      email:
+        example: john@example.com
+        type: string
+      id:
+        description: biar bisa dipakai di repository
+        type: integer
+      jurusan:
+        example: Teknik Informatika
+        type: string
+      nama:
+        example: John Doe
+        type: string
+      nim:
+        example: "12345678"
+        type: string
+      no_telepon:
+        example: "08123456789"
+        type: string
+      status_kematian:
+        example: false
+        type: boolean
+      tahun_lulus:
+        example: 2023
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  model.UpdatePekerjaanRequest:
+    properties:
+      bidang_industri:
+        type: string
+      deskripsi_pekerjaan:
+        type: string
+      gaji_range:
+        type: string
+      lokasi_kerja:
+        type: string
+      nama_perusahaan:
+        type: string
+      posisi_jabatan:
+        type: string
+      status_pekerjaan:
+        type: string
+      tanggal_mulai_kerja:
+        type: string
+      tanggal_selesai_kerja:
+        type: string
+    type: object
+  model.UpdateStatusKematianRequest:
+    properties:
+      status_kematian:
+        example: true
+        type: boolean
+    type: object
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+  modelmongo.CreatePekerjaanRequest:
+    properties:
+      alumni_id:
+        type: integer
+      bidang_industri:
+        type: string
+      deskripsi_pekerjaan:
+        type: string
+      gaji_range:
+        type: string
+      lokasi_kerja:
+        type: string
+      nama_perusahaan:
+        type: string
+      posisi_jabatan:
+        type: string
+      status_pekerjaan:
+        type: string
+      tanggal_mulai_kerja:
+        description: ISO8601 expected, optional
+        type: string
+      tanggal_selesai_kerja:
+        description: ISO8601 expected, optional
+        type: string
+    type: object
+  modelmongo.UpdatePekerjaanRequest:
+    properties:
+      bidang_industri:
+        type: string
+      deskripsi_pekerjaan:
+        type: string
+      gaji_range:
+        type: string
+      lokasi_kerja:
+        type: string
+      nama_perusahaan:
+        type: string
+      posisi_jabatan:
+        type: string
+      status_pekerjaan:
+        type: string
+      tanggal_mulai_kerja:
+        description: optional ISO8601
+        type: string
+      tanggal_selesai_kerja:
+        description: optional ISO8601
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: scheerly.tnv@gmail.com
+    name: Sherly Tanti Virginia
+    url: https://github.com/scherlyz
+  description: API untuk mengelola data backend menggunakan Fiber dan MongoDB.
+  title: BackendGo API
+  version: "1.0"
+paths:
+  /api/alumni:
+    get:
+      description: Mengambil daftar lengkap semua alumni dari database (hanya bisa
+        diakses user yang login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data alumni
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Terjadi kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua data alumni
+      tags:
+      - Alumni
+    post:
+      consumes:
+      - application/json
+      description: Membuat data alumni baru dan menyimpannya ke database (hanya bisa
+        diakses user yang login)
+      parameters:
+      - description: Data alumni baru
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateAlumniRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Alumni berhasil dibuat
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Body request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menyimpan ke database
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah alumni baru
+      tags:
+      - Alumni
+  /api/alumni/{id}:
+    delete:
+      description: Menghapus data alumni berdasarkan ID (hanya bisa diakses user yang
+        login)
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Alumni berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menghapus data alumni
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus data alumni
+      tags:
+      - Alumni
+    get:
+      description: Mengambil data alumni tertentu berdasarkan ID-nya (hanya bisa diakses
+        user yang login)
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data alumni
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Alumni tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil data alumni berdasarkan ID
+      tags:
+      - Alumni
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui data alumni berdasarkan ID (hanya bisa diakses user
+        yang login)
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data alumni yang diperbarui
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAlumniRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data alumni diperbarui
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Body atau ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal memperbarui data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update data alumni
+      tags:
+      - Alumni
+  /api/alumni/{id}/kematian:
+    put:
+      consumes:
+      - application/json
+      description: Mengubah status kematian alumni (hidup/wafat) (hanya bisa diakses
+        user yang login)
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Status kematian alumni
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateStatusKematianRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status kematian diperbarui
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Body atau ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal memperbarui status kematian
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update status kematian alumni
+      tags:
+      - Alumni
+  /api/alumni/pagination:
+    get:
+      description: Mengambil daftar alumni dengan fitur pencarian, sorting, dan pagination
+        (hanya bisa diakses user yang login)
+      parameters:
+      - description: Nomor halaman (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Jumlah data per halaman (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Kolom pengurutan (default id)
+        in: query
+        name: sortBy
+        type: string
+      - description: Urutan (asc/desc)
+        in: query
+        name: order
+        type: string
+      - description: Kata kunci pencarian
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data alumni dengan pagination
+          schema:
+            $ref: '#/definitions/model.AlumniResponse'
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal mengambil data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil data alumni dengan pagination dan pencarian
+      tags:
+      - Alumni
+  /api/files:
+    get:
+      description: Menampilkan semua file milik user login. Jika user adalah admin,
+        maka akan menampilkan semua file dari seluruh user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil daftar file
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua file
+      tags:
+      - File
+  /api/files/{id}:
+    delete:
+      description: Menghapus file berdasarkan ID. User hanya bisa menghapus file miliknya
+        sendiri, admin dapat menghapus semua file.
+      parameters:
+      - description: ID File (ObjectID MongoDB)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Tidak boleh hapus file milik user lain
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: File tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menghapus file
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus file
+      tags:
+      - File
+    get:
+      description: Mengambil file berdasarkan ID. User hanya bisa mengakses file miliknya
+        sendiri, kecuali admin yang bisa mengakses semua file.
+      parameters:
+      - description: ID File (ObjectID MongoDB)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data file
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Akses ditolak
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: File tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil file berdasarkan ID
+      tags:
+      - File
+  /api/files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Mengunggah file (foto atau sertifikat) ke server dan menyimpannya
+        ke MongoDB. Hanya bisa diakses user yang login. Admin dapat mengupload file
+        untuk user lain dengan menambahkan form field `user_id`.
+      parameters:
+      - description: File yang akan diupload (foto atau sertifikat)
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Kategori file (foto / sertifikat)
+        in: formData
+        name: category
+        type: string
+      - description: 'Hanya admin: ID user lain yang ingin diuploadkan file'
+        in: formData
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File berhasil diupload
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload file (foto atau sertifikat)
+      tags:
+      - File
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentikasi user menggunakan username/email dan password, kemudian
+        menghasilkan JWT token
+      parameters:
+      - description: Data login (username dan password)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.LoginResponse'
+        "400":
+          description: Request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Username atau password salah
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - Auth
+  /api/pekerjaan:
+    get:
+      description: Mengambil semua data pekerjaan dari database (hanya bisa diakses
+        user yang login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Terjadi kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua data pekerjaan
+      tags:
+      - Pekerjaan
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data pekerjaan baru untuk alumni (hanya bisa diakses
+        user yang login)
+      parameters:
+      - description: Data pekerjaan baru
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreatePekerjaanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Pekerjaan berhasil dibuat
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Body request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menyimpan data pekerjaan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah pekerjaan baru
+      tags:
+      - Pekerjaan
+  /api/pekerjaan-mongo:
+    get:
+      description: Mengambil semua data pekerjaan dari MongoDB. Hanya bisa diakses
+        oleh user yang login.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil semua data pekerjaan
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal mengambil data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua data pekerjaan (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data pekerjaan baru ke MongoDB. Hanya bisa diakses
+        user yang login.
+      parameters:
+      - description: Data pekerjaan baru
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/modelmongo.CreatePekerjaanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Data pekerjaan berhasil ditambahkan
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Body request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menyimpan data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Tambah data pekerjaan (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+  /api/pekerjaan-mongo/{id}:
+    delete:
+      description: Menghapus data pekerjaan secara permanen dari MongoDB. Hanya bisa
+        diakses user login.
+      parameters:
+      - description: ID Pekerjaan (ObjectID MongoDB)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data pekerjaan berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menghapus data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus data pekerjaan (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+    get:
+      description: Mengambil satu data pekerjaan berdasarkan ID di MongoDB. Hanya
+        bisa diakses user login.
+      parameters:
+      - description: ID Pekerjaan (ObjectID MongoDB)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Data tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil pekerjaan berdasarkan ID (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui data pekerjaan berdasarkan ID di MongoDB. Hanya bisa
+        diakses user login.
+      parameters:
+      - description: ID Pekerjaan (ObjectID MongoDB)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data pekerjaan yang akan diperbarui
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/modelmongo.UpdatePekerjaanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data pekerjaan berhasil diupdate
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Request tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal memperbarui data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update data pekerjaan (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+  /api/pekerjaan-mongo/alumni/{alumni_id}:
+    get:
+      description: Mengambil semua pekerjaan milik alumni tertentu dari MongoDB. Hanya
+        bisa diakses user yang login.
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: alumni_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil pekerjaan berdasarkan ID alumni (MongoDB)
+      tags:
+      - Pekerjaan Mongo
+  /api/pekerjaan/{id}:
+    delete:
+      description: Menghapus data pekerjaan secara permanen (hanya bisa diakses user
+        yang login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pekerjaan berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal menghapus pekerjaan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hapus pekerjaan
+      tags:
+      - Pekerjaan
+    get:
+      description: Mengambil detail pekerjaan berdasarkan ID (hanya bisa diakses user
+        yang login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data pekerjaan ditemukan
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Data pekerjaan tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil pekerjaan berdasarkan ID
+      tags:
+      - Pekerjaan
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui data pekerjaan berdasarkan ID (hanya bisa diakses user
+        yang login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data pekerjaan yang diperbarui
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePekerjaanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pekerjaan berhasil diperbarui
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Body atau ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal memperbarui data pekerjaan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update data pekerjaan
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/{id}/hard-delete:
+    delete:
+      description: Menghapus data pekerjaan secara permanen dari database (hanya bisa
+        diakses user yang login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hard delete pekerjaan berhasil
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal melakukan hard delete
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hard delete pekerjaan
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/{id}/restore:
+    put:
+      description: Mengembalikan data pekerjaan yang sudah di-soft delete (hanya bisa
+        diakses user yang login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Restore pekerjaan berhasil
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal melakukan restore
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Restore pekerjaan
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/{id}/soft-delete:
+    put:
+      description: Menandai data pekerjaan sebagai dihapus (tidak benar-benar dihapus
+        dari database, hanya untuk user login)
+      parameters:
+      - description: ID Pekerjaan
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Soft delete pekerjaan berhasil
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal melakukan soft delete
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Soft delete pekerjaan
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/alumni/{alumni_id}:
+    get:
+      description: Mengambil semua data pekerjaan milik alumni tertentu (hanya bisa
+        diakses user yang login)
+      parameters:
+      - description: ID Alumni
+        in: path
+        name: alumni_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan alumni
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID alumni tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil pekerjaan berdasarkan ID Alumni
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/list:
+    get:
+      description: Mengambil semua data pekerjaan dengan fitur pencarian, sorting,
+        dan pagination (hanya bisa diakses user yang login)
+      parameters:
+      - description: Nomor halaman (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Jumlah data per halaman (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Kolom pengurutan (default created_at)
+        in: query
+        name: sortBy
+        type: string
+      - description: Urutan (asc/desc)
+        in: query
+        name: order
+        type: string
+      - description: Kata kunci pencarian
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Kesalahan server
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil semua pekerjaan dengan pagination
+      tags:
+      - Pekerjaan
+  /api/pekerjaan/trashed:
+    get:
+      description: Menampilkan daftar pekerjaan yang sudah di-soft delete (hanya bisa
+        diakses user yang login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data pekerjaan terhapus
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Gagal mengambil data pekerjaan terhapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil data pekerjaan yang dihapus (trashed)
+      tags:
+      - Pekerjaan
+  /api/profile:
+    get:
+      description: Mengambil profil user yang sedang login berdasarkan token JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil profil
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Token tidak valid atau tidak ditemukan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ambil profil user
+      tags:
+      - Auth
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: 'Masukkan format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -8,6 +8,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// LoginService godoc
+// @Summary Login user
+// @Description Autentikasi user menggunakan username/email dan password, kemudian menghasilkan JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body model.LoginRequest true "Data login (username dan password)"
+// @Success 200 {object} model.LoginResponse
+// @Failure 400 {object} map[string]string "Request tidak valid"
+// @Failure 401 {object} map[string]string "Username atau password salah"
+// @Failure 500 {object} map[string]string "Kesalahan server"
+// @Router /api/login [post]
 func LoginService(c *fiber.Ctx) error {
 	var req model.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -63,6 +75,15 @@ func LoginService(c *fiber.Ctx) error {
 	})
 }
 
+// GetProfileService godoc
+// @Summary Ambil profil user
+// @Description Mengambil profil user yang sedang login berdasarkan token JWT
+// @Tags Auth
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]interface{} "Berhasil mengambil profil"
+// @Failure 401 {object} map[string]string "Token tidak valid atau tidak ditemukan"
+// @Router /api/profile [get]
 func GetProfileService(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(int)
 	username := c.Locals("username").(string)
