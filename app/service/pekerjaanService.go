@@ -12,6 +12,7 @@ import (
 )
 
 
+
 // GetAllPekerjaanService godoc
 // @Summary Ambil semua data pekerjaan
 // @Description Mengambil semua data pekerjaan dari database (hanya bisa diakses user yang login)
